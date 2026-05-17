@@ -250,3 +250,9 @@ Filerobot always exports PNG regardless of the user's format choice. The server 
 ## License
 
 MIT
+
+---
+
+## Related
+
+This package uses [Intervention Image](https://image.intervention.io/) for server-side image processing (optimization, format conversion, WebP/AVIF generation).
