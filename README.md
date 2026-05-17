@@ -324,6 +324,41 @@ Filerobot always exports PNG regardless of the user's format choice. The server 
 - **JPG → PNG**: convert to lossless format
 - **Same format**: optimize only (strip metadata, resize if configured)
 
+## Artisan Commands
+
+| Command | Description |
+|---------|-------------|
+| `image-editor:optimize {path} --disk=public --queue` | Optimize a single image and generate conversions. Use `--queue` to dispatch async. |
+| `image-editor:clear-conversions --disk=public --path= --dry-run` | Remove orphan WebP/AVIF files where the original image no longer exists. Use `--dry-run` to preview. |
+| `image-editor:reset-settings` | Reset image editor settings stored in DB back to config defaults. |
+
+```bash
+# Optimize a single image
+php artisan image-editor:optimize banners/photo.jpg
+
+# Optimize on a specific disk, async
+php artisan image-editor:optimize banners/photo.jpg --disk=s3 --queue
+
+# Find orphan conversions in a directory
+php artisan image-editor:clear-conversions --path=banners --dry-run
+
+# Delete all orphan conversions
+php artisan image-editor:clear-conversions
+
+# Reset settings to defaults
+php artisan image-editor:reset-settings
+```
+
+## Security
+
+All controller endpoints are protected by MoonShine auth middleware. Additionally:
+
+- **Settings whitelist** — only predefined keys are accepted (`quality`, `convert`, `optimize`, `queue`), unknown keys are silently ignored
+- **Path traversal protection** — `../` and url-encoded variants are rejected in source paths
+- **File type validation** — only image extensions (`jpg`, `jpeg`, `png`, `gif`, `webp`, `avif`) are processed
+- **Batch limit** — max 500 files per batch operation
+- **Settings validation** — quality values clamped to 1–100, dimensions capped at 10000px, types enforced
+
 ## Publishing
 
 | Tag | Description |

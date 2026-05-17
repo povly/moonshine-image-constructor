@@ -153,6 +153,16 @@
                         },
                     });
 
+                    if (!response.ok) {
+                        let errorMsg = toastMsg('saveFailed');
+                        try {
+                            const errorData = await response.json();
+                            errorMsg = errorData.message || errorMsg;
+                        } catch (_) {}
+                        window.MoonShine?.ui?.toast(errorMsg, 'error');
+                        return;
+                    }
+
                     const data = await response.json();
 
                     if (data.status) {

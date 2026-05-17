@@ -171,6 +171,13 @@ function imageEditorBatch() {
                 this.progress.logs = [];
             });
         },
+
+        destroy() {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+                this.pollInterval = null;
+            }
+        },
     };
 }
 </script>

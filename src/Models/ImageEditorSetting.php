@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 final class ImageEditorSetting extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'image_editor_settings';
 
     protected $fillable = [

@@ -8,12 +8,11 @@ use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\Enums\FormMethod;
 use MoonShine\UI\Components\FlexibleRender;
 use MoonShine\UI\Components\FormBuilder;
+use MoonShine\UI\Components\Heading;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
-use MoonShine\UI\Components\Heading;
 use MoonShine\UI\Fields\Number;
-use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
 use Povly\MoonShineImageEditor\Services\SettingsService;
 

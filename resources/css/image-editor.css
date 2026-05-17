@@ -1,3 +1,38 @@
+:root {
+    --ie-bg: #ffffff;
+    --ie-bg-secondary: #f9fafb;
+    --ie-border: #d1d5db;
+    --ie-text: #374151;
+    --ie-text-secondary: #6b7280;
+    --ie-text-muted: #9ca3af;
+    --ie-accent: #4f46e5;
+    --ie-accent-secondary: #7c3aed;
+    --ie-success: #22c55e;
+    --ie-success-text: #15803d;
+    --ie-success-text-alt: #16a34a;
+    --ie-error: #dc2626;
+    --ie-warning-text: #a16207;
+    --ie-badge-success-bg: #dcfce7;
+    --ie-badge-error-bg: #fee2e2;
+    --ie-badge-warning-bg: #fef9c3;
+}
+
+html.dark {
+    --ie-bg: #1e293b;
+    --ie-bg-secondary: #0f172a;
+    --ie-border: #334155;
+    --ie-text: #e2e8f0;
+    --ie-text-secondary: #94a3b8;
+    --ie-text-muted: #64748b;
+    --ie-success-text: #4ade80;
+    --ie-success-text-alt: #4ade80;
+    --ie-error: #f87171;
+    --ie-warning-text: #fbbf24;
+    --ie-badge-success-bg: #052e16;
+    --ie-badge-error-bg: #450a0a;
+    --ie-badge-warning-bg: #422006;
+}
+
 #ie-toolbar {
     display: flex;
     align-items: center;
@@ -34,69 +69,44 @@
 /* ── Batch Processing ── */
 .ie-batch{display:flex;flex-direction:column;gap:24px}
 .ie-batch h2{font-size:18px;font-weight:600;margin:0;color:currentColor}
-.ie-batch-box{border:1px solid #d1d5db;border-radius:8px;padding:20px;background:#fff;color:#374151}
+.ie-batch-box{border:1px solid var(--ie-border);border-radius:8px;padding:20px;background:var(--ie-bg);color:var(--ie-text)}
 .ie-batch-row{display:flex;align-items:center;gap:12px}
 .ie-batch-label{display:block;font-size:14px;font-weight:500;margin-bottom:6px;color:currentColor}
-.ie-batch-select{border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:14px;min-width:300px;background:#fff;color:#374151}
+.ie-batch-select{border:1px solid var(--ie-border);border-radius:6px;padding:8px 12px;font-size:14px;min-width:300px;background:var(--ie-bg);color:var(--ie-text)}
 .ie-batch-btn{display:inline-flex;align-items:center;gap:8px;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:14px;font-weight:500;cursor:pointer}
-.ie-batch-btn--scan{background:#4f46e5}
-.ie-batch-btn--start{background:#7c3aed}
+.ie-batch-btn--scan{background:var(--ie-accent)}
+.ie-batch-btn--start{background:var(--ie-accent-secondary)}
 .ie-batch-btn:disabled{opacity:.6;cursor:not-allowed}
 .ie-batch-btn:hover:not(:disabled){filter:brightness(1.1)}
-.ie-batch-count{font-size:14px;color:#6b7280}
+.ie-batch-count{font-size:14px;color:var(--ie-text-secondary)}
 .ie-batch-progress-head{display:flex;justify-content:space-between;margin-bottom:10px}
 .ie-batch-progress-label{font-size:14px;font-weight:500;color:currentColor}
 .ie-batch-progress-pct{font-size:14px;font-weight:600;color:currentColor}
-.ie-batch-track{height:12px;width:100%;background:#e5e7eb;border-radius:9999px;overflow:hidden}
+.ie-batch-track{height:12px;width:100%;background:var(--ie-border);border-radius:9999px;overflow:hidden}
 .ie-batch-fill{height:100%;border-radius:9999px;transition:width .5s,background .3s}
-.ie-batch-fill--active{background:#4f46e5}
-.ie-batch-fill--done{background:#22c55e}
+.ie-batch-fill--active{background:var(--ie-accent)}
+.ie-batch-fill--done{background:var(--ie-success)}
 .ie-batch-status{margin-top:8px;display:flex;gap:16px}
-.ie-batch-complete{font-size:14px;font-weight:500;color:#16a34a}
-.ie-batch-failed{font-size:14px;color:#dc2626}
+.ie-batch-complete{font-size:14px;font-weight:500;color:var(--ie-success-text-alt)}
+.ie-batch-failed{font-size:14px;color:var(--ie-error)}
 .ie-batch-log-head{display:flex;justify-content:space-between;margin-bottom:12px}
-.ie-batch-log-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#6b7280}
-.ie-batch-log-clear{font-size:12px;color:#6b7280;background:none;border:none;cursor:pointer}
-.ie-batch-log-clear:hover{color:#dc2626}
-.ie-batch-log{max-height:400px;overflow-y:auto;background:#f9fafb;border-radius:6px;padding:12px;font-family:monospace;font-size:12px}
-.ie-batch-entry{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #e5e7eb;color:#374151}
+.ie-batch-log-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--ie-text-secondary)}
+.ie-batch-log-clear{font-size:12px;color:var(--ie-text-secondary);background:none;border:none;cursor:pointer}
+.ie-batch-log-clear:hover{color:var(--ie-error)}
+.ie-batch-log{max-height:400px;overflow-y:auto;background:var(--ie-bg-secondary);border-radius:6px;padding:12px;font-family:monospace;font-size:12px}
+.ie-batch-entry{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--ie-border);color:var(--ie-text)}
 .ie-batch-entry:last-child{border-bottom:none}
-.ie-batch-entry--success{color:#15803d}
-.ie-batch-entry--error{color:#dc2626}
-.ie-batch-entry--warning{color:#a16207}
-.ie-batch-entry--skipped{color:#a16207}
-.ie-batch-time{color:#9ca3af;flex-shrink:0}
+.ie-batch-entry--success{color:var(--ie-success-text)}
+.ie-batch-entry--error{color:var(--ie-error)}
+.ie-batch-entry--warning{color:var(--ie-warning-text)}
+.ie-batch-entry--skipped{color:var(--ie-warning-text)}
+.ie-batch-time{color:var(--ie-text-muted);flex-shrink:0}
 .ie-batch-badge{flex-shrink:0;width:60px;text-align:center;border-radius:4px;font-size:11px;font-weight:600;padding:1px 4px}
-.ie-batch-badge--success{background:#dcfce7;color:#15803d}
-.ie-batch-badge--error{background:#fee2e2;color:#dc2626}
-.ie-batch-badge--skipped{background:#fef9c3;color:#a16207}
-.ie-batch-badge--warning{background:#fef9c3;color:#a16207}
-.ie-batch-empty{color:#9ca3af;text-align:center;padding:16px 0}
+.ie-batch-badge--success{background:var(--ie-badge-success-bg);color:var(--ie-success-text)}
+.ie-batch-badge--error{background:var(--ie-badge-error-bg);color:var(--ie-error)}
+.ie-batch-badge--skipped{background:var(--ie-badge-warning-bg);color:var(--ie-warning-text)}
+.ie-batch-badge--warning{background:var(--ie-badge-warning-bg);color:var(--ie-warning-text)}
+.ie-batch-empty{color:var(--ie-text-muted);text-align:center;padding:16px 0}
 .ie-batch-spin{width:16px;height:16px;animation:ie-spin 1s linear infinite}
 .ie-batch[x-cloak]{display:none!important}
 @keyframes ie-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-
-/* ── Dark Mode ── */
-html.dark .ie-batch-box{background:#1e293b;border-color:#334155;color:#e2e8f0}
-html.dark .ie-batch-select{background:#1e293b;border-color:#475569;color:#e2e8f0}
-html.dark .ie-batch-count{color:#94a3b8}
-html.dark .ie-batch-track{background:#334155}
-html.dark .ie-batch-progress-label,
-html.dark .ie-batch-progress-pct{color:#e2e8f0}
-html.dark .ie-batch-log{background:#0f172a;border:1px solid #1e293b}
-html.dark .ie-batch-entry{border-bottom-color:#1e293b;color:#e2e8f0}
-html.dark .ie-batch-entry--success{color:#4ade80}
-html.dark .ie-batch-entry--error{color:#f87171}
-html.dark .ie-batch-entry--warning{color:#fbbf24}
-html.dark .ie-batch-entry--skipped{color:#fbbf24}
-html.dark .ie-batch-time{color:#64748b}
-html.dark .ie-batch-badge--success{background:#052e16;color:#4ade80}
-html.dark .ie-batch-badge--error{background:#450a0a;color:#f87171}
-html.dark .ie-batch-badge--skipped{background:#422006;color:#fbbf24}
-html.dark .ie-batch-badge--warning{background:#422006;color:#fbbf24}
-html.dark .ie-batch-log-title{color:#94a3b8}
-html.dark .ie-batch-log-clear{color:#94a3b8}
-html.dark .ie-batch-log-clear:hover{color:#f87171}
-html.dark .ie-batch-empty{color:#64748b}
-html.dark .ie-batch-complete{color:#4ade80}
-html.dark .ie-batch-failed{color:#f87171}

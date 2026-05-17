@@ -11,6 +11,10 @@ use Povly\MoonShineImageEditor\Services\BatchProcessService;
 
 final class BatchProcessController extends Controller
 {
+    private const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+
+    private const MAX_BATCH_FILES = 500;
+
     public function __construct(
         private BatchProcessService $batchService,
     ) {}
@@ -30,7 +34,6 @@ final class BatchProcessController extends Controller
     public function start(Request $request): JsonResponse
     {
         $files = $request->input('files', []);
-        $disk = config('moonshine.media_manager.disk', 'public');
 
         if (empty($files)) {
             return response()->json([
@@ -38,6 +41,16 @@ final class BatchProcessController extends Controller
                 'message' => __('image-editor::image-editor.no_files_selected'),
             ], 422);
         }
+
+        $files = array_slice($files, 0, self::MAX_BATCH_FILES);
+
+        $files = array_values(array_filter($files, function (string $path): bool {
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+            return in_array($ext, self::ALLOWED_IMAGE_EXTENSIONS, true);
+        }));
+
+        $disk = config('moonshine.media_manager.disk', 'public');
 
         $batchId = $this->batchService->startBatch($files, $disk);
 

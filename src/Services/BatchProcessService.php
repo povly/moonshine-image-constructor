@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor\Services;
 
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Povly\MoonShineImageEditor\Jobs\BatchOptimizeImage;
@@ -15,20 +16,23 @@ final class BatchProcessService
         private SettingsService $settingsService,
     ) {}
 
+    private const MAX_SCAN_FILES = 5000;
+
     public function scanFiles(string $disk = 'public', string $filter = 'all'): array
     {
         $storage = Storage::disk($disk);
         $extensions = ['jpg', 'jpeg', 'png', 'gif'];
 
         $files = collect($storage->allFiles())
-            ->filter(fn (string $file): bool => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), $extensions));
+            ->filter(fn (string $file): bool => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), $extensions))
+            ->take(self::MAX_SCAN_FILES);
 
         if ($filter === 'only_without_conversions') {
             $files = $files->filter(function (string $file) use ($storage): bool {
                 $info = pathinfo($file);
 
-                $webpPath = $info['dirname'] . '/' . $info['filename'] . '.webp';
-                $avifPath = $info['dirname'] . '/' . $info['filename'] . '.avif';
+                $webpPath = $info['dirname'].'/'.$info['filename'].'.webp';
+                $avifPath = $info['dirname'].'/'.$info['filename'].'.avif';
 
                 return ! $storage->exists($webpPath) && ! $storage->exists($avifPath);
             });
@@ -39,12 +43,18 @@ final class BatchProcessService
 
     public function startBatch(array $relativePaths, string $disk = 'public'): string
     {
-        $batchId = uniqid('img_', true);
+        $batchId = Str::uuid()->toString();
         $optimizerConfig = $this->settingsService->getOptimizerConfig();
         $storage = Storage::disk($disk);
 
         $jobs = [];
         foreach ($relativePaths as $relativePath) {
+            // Reject paths with directory traversal sequences
+            $normalized = str_replace('\\', '/', $relativePath);
+            if (str_contains($normalized, '..')) {
+                continue;
+            }
+
             $fullPath = $storage->path($relativePath);
 
             if (! file_exists($fullPath)) {
@@ -58,6 +68,10 @@ final class BatchProcessService
                 optimizerConfig: $optimizerConfig,
                 trackingId: $batchId,
             );
+        }
+
+        if ($jobs === []) {
+            return '';
         }
 
         Cache::put("image-editor-batch-log-{$batchId}", [], now()->addHours(6));

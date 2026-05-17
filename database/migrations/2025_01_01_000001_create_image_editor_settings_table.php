@@ -13,7 +13,6 @@ return new class extends Migration
         Schema::create('image_editor_settings', function (Blueprint $table): void {
             $table->id();
             $table->json('settings')->nullable();
-            $table->timestamps();
         });
     }
 

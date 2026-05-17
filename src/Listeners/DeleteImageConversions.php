@@ -19,10 +19,10 @@ final class DeleteImageConversions
 
         $storage = Storage::disk($event->disk);
         $info = pathinfo($event->path);
-        $basePath = $info['dirname'] . '/' . $info['filename'];
+        $basePath = $info['dirname'].'/'.$info['filename'];
 
         foreach (['webp', 'avif'] as $format) {
-            $conversionPath = $basePath . '.' . $format;
+            $conversionPath = $basePath.'.'.$format;
 
             if ($storage->exists($conversionPath)) {
                 $storage->delete($conversionPath);

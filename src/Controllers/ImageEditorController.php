@@ -8,16 +8,19 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
-use Povly\MoonShineImageEditor\Jobs\ProcessEditedImage;
 use Povly\MoonShineImageEditor\Services\ImageOptimizer;
+use Povly\MoonShineImageEditor\Services\SettingsService;
 
 class ImageEditorController extends Controller
 {
+    public function __construct(
+        private SettingsService $settingsService,
+    ) {}
     public function save(Request $request): JsonResponse
     {
         $request->validate([
-            'source_path' => ['required', 'string'],
-            'image' => ['required', 'file', 'image'],
+            'source_path' => ['required', 'string', 'max:512'],
+            'image' => ['required', 'file', 'image', 'max:20480'],
             'target_format' => ['nullable', 'string', 'in:png,jpg,jpeg'],
         ]);
 
@@ -29,7 +32,28 @@ class ImageEditorController extends Controller
         $disk = config('moonshine.media_manager.disk', 'public');
         $storage = Storage::disk($disk);
 
-        $sourceInfo = pathinfo($sourcePath);
+        // Prevent path traversal: reject paths containing directory traversal sequences
+        // and verify the source file actually exists on the configured disk
+        $normalizedSourcePath = str_replace('\\', '/', $sourcePath);
+
+        if (str_contains($normalizedSourcePath, '..') || str_contains(urldecode($normalizedSourcePath), '..') || ! $storage->exists($normalizedSourcePath)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid source path.',
+            ], 403);
+        }
+
+        $sourceInfo = pathinfo($normalizedSourcePath);
+
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+        $sourceExtension = strtolower($sourceInfo['extension'] ?? '');
+
+        if (! in_array($sourceExtension, $allowedExtensions, true)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid source file type.',
+            ], 403);
+        }
         $directory = $sourceInfo['dirname'] ?? '.';
         $filename = $sourceInfo['filename'] ?? 'image';
 
@@ -38,15 +62,9 @@ class ImageEditorController extends Controller
         $saveExtension = $targetFormat;
 
         if ($overwrite) {
-            $saveName = $filename . '.' . $saveExtension;
+            $saveName = $filename.'.'.$saveExtension;
         } else {
-            $saveName = $filename . '-edited.' . $saveExtension;
-
-            $counter = 1;
-            while ($storage->exists($directory . '/' . $saveName)) {
-                $saveName = $filename . '-edited-' . $counter . '.' . $saveExtension;
-                $counter++;
-            }
+            $saveName = $filename.'-edited-'.uniqid().'.'.$saveExtension;
         }
 
         $saveDir = ($directory === '.' || $directory === '/') ? '/' : $directory;
@@ -61,27 +79,35 @@ class ImageEditorController extends Controller
                 ], 500);
             }
         } catch (\Throwable $e) {
+            ($e);
+
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to save image.',
             ], 500);
         }
 
         $fullPath = $storage->path($saved);
         $finalPath = $saved;
 
-        $optimizerConfig = $this->getOptimizerConfig();
+        $optimizerConfig = $this->settingsService->getOptimizerConfig();
         $optimizer = new ImageOptimizer($fullPath, $optimizerConfig);
+
+        $actualFullPath = $fullPath;
 
         if ($saveExtension !== $originalExtension && file_exists($fullPath)) {
             $resultPath = $optimizer->convertFormat($saveExtension);
 
             if ($resultPath !== $fullPath) {
-                $finalPath = ltrim(str_replace($storage->path(''), '', $resultPath), '/');
+                $storagePath = $storage->path('');
+                $finalPath = str_starts_with($resultPath, $storagePath)
+                    ? ltrim(substr($resultPath, strlen($storagePath)), '/')
+                    : $resultPath;
+                $actualFullPath = $resultPath;
             }
         }
 
-        $this->processOptimization($fullPath, $finalPath, $disk);
+        $this->settingsService->dispatchOptimization($actualFullPath, $finalPath, $disk);
 
         return response()->json([
             'status' => true,
@@ -89,46 +115,5 @@ class ImageEditorController extends Controller
             'path' => $finalPath,
             'url' => $storage->url($finalPath),
         ]);
-    }
-
-    private function processOptimization(string $fullPath, string $relativePath, string $disk): void
-    {
-        if (! file_exists($fullPath)) {
-            return;
-        }
-
-        $optimizerConfig = $this->getOptimizerConfig();
-
-        if (config('moonshine.image_editor.queue.enabled', false)) {
-            $connection = config('moonshine.image_editor.queue.connection');
-            $queue = config('moonshine.image_editor.queue.queue', 'images');
-            $delay = config('moonshine.image_editor.queue.delay');
-
-            $job = new ProcessEditedImage($fullPath, $relativePath, $disk, $optimizerConfig);
-
-            if ($connection) {
-                $job->onConnection($connection);
-            }
-
-            $job->onQueue($queue);
-
-            if ($delay !== null) {
-                $job->delay(now()->addSeconds((int) $delay));
-            }
-
-            dispatch($job);
-        } else {
-            $optimizer = new ImageOptimizer($fullPath, $optimizerConfig);
-            $optimizer->process();
-        }
-    }
-
-    private function getOptimizerConfig(): array
-    {
-        return [
-            'quality' => config('moonshine.image_editor.quality', []),
-            'optimize' => config('moonshine.image_editor.optimize', []),
-            'convert' => config('moonshine.image_editor.convert', []),
-        ];
     }
 }

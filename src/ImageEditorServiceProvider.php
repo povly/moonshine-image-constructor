@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Contracts\MenuManager\MenuManagerContract;
 use MoonShine\MenuManager\MenuItem;
+use Povly\MoonShineImageEditor\Console\Commands\ImageClearConversionsCommand;
+use Povly\MoonShineImageEditor\Console\Commands\ImageOptimizeCommand;
+use Povly\MoonShineImageEditor\Console\Commands\ImageResetSettingsCommand;
 use Povly\MoonShineImageEditor\Listeners\DeleteImageConversions;
 use Povly\MoonShineImageEditor\Listeners\OptimizeUploadedImage;
 use Povly\MoonShineImageEditor\Pages\ImageSettingsPage;
@@ -63,6 +67,14 @@ class ImageEditorServiceProvider extends ServiceProvider
         $menu->add([
             MenuItem::make(ImageSettingsPage::class, __('image-editor::image-editor.menu_title'))->icon('cog'),
         ]);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ImageOptimizeCommand::class,
+                ImageClearConversionsCommand::class,
+                ImageResetSettingsCommand::class,
+            ]);
+        }
     }
 
     public function register(): void
@@ -70,8 +82,11 @@ class ImageEditorServiceProvider extends ServiceProvider
         $this->app->booted(function (): void {
             try {
                 app(SettingsService::class)->applyToConfig();
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
                 // Settings table may not exist yet during migration
+                Log::warning('[ImageEditor] Could not apply settings', [
+                    'error' => $e->getMessage(),
+                ]);
             }
         });
     }

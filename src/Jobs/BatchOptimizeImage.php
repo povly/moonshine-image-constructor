@@ -24,6 +24,11 @@ final class BatchOptimizeImage implements ShouldQueue
 
     public int $timeout = 120;
 
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
+
     public function __construct(
         private string $fullPath,
         private string $relativePath,
@@ -46,8 +51,8 @@ final class BatchOptimizeImage implements ShouldQueue
 
         $sizeBefore = filesize($this->fullPath);
         $info = pathinfo($this->fullPath);
-        $webpPath = $info['dirname'] . '/' . $info['filename'] . '.webp';
-        $avifPath = $info['dirname'] . '/' . $info['filename'] . '.avif';
+        $webpPath = $info['dirname'].'/'.$info['filename'].'.webp';
+        $avifPath = $info['dirname'].'/'.$info['filename'].'.avif';
         $webpExistedBefore = file_exists($webpPath);
         $avifExistedBefore = file_exists($avifPath);
         $webpEnabled = (bool) ($this->optimizerConfig['convert']['webp']['enabled'] ?? false);
@@ -138,6 +143,8 @@ final class BatchOptimizeImage implements ShouldQueue
         ));
     }
 
+    private const MAX_LOG_ENTRIES = 500;
+
     private function log(string $type, string $message): void
     {
         $cacheKey = "image-editor-batch-log-{$this->trackingId}";
@@ -149,20 +156,25 @@ final class BatchOptimizeImage implements ShouldQueue
             'time' => now()->format('H:i:s'),
         ];
 
+        // Prevent unbounded cache growth for large batches
+        if (count($logs) > self::MAX_LOG_ENTRIES) {
+            $logs = array_slice($logs, -self::MAX_LOG_ENTRIES);
+        }
+
         Cache::put($cacheKey, $logs, now()->addHours(6));
     }
 
     private function formatBytes(int $bytes): string
     {
         if ($bytes >= 1048576) {
-            return round($bytes / 1048576, 2) . ' MB';
+            return round($bytes / 1048576, 2).' MB';
         }
 
         if ($bytes >= 1024) {
-            return round($bytes / 1024, 2) . ' KB';
+            return round($bytes / 1024, 2).' KB';
         }
 
-        return $bytes . ' B';
+        return $bytes.' B';
     }
 
     private function formatPercent(float $percent): string
@@ -172,7 +184,7 @@ final class BatchOptimizeImage implements ShouldQueue
         }
 
         if ($percent < 0) {
-            return '+' . abs($percent) . '%';
+            return '+'.abs($percent).'%';
         }
 
         return '0%';

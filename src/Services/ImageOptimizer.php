@@ -56,13 +56,13 @@ final class ImageOptimizer
         }
 
         if (filesize($targetPath) >= filesize($this->fullPath)) {
-            unlink($targetPath);
+            @unlink($targetPath);
 
             return $this->fullPath;
         }
 
         if ($sourceFormat !== $targetFormat && file_exists($this->fullPath) && $this->fullPath !== $targetPath) {
-            unlink($this->fullPath);
+            @unlink($this->fullPath);
         }
 
         return $targetPath;
@@ -104,19 +104,25 @@ final class ImageOptimizer
             return;
         }
 
-        $tempPath = $this->fullPath . '.tmp';
-        $encoded->save($tempPath);
+        $tempPath = dirname($this->fullPath) . '/' . pathinfo($this->fullPath, PATHINFO_FILENAME) . '.' . uniqid('', true) . '.tmp';
 
-        if (! file_exists($tempPath)) {
-            return;
-        }
+        try {
+            $encoded->save($tempPath);
 
-        $sizeAfter = filesize($tempPath);
+            if (! file_exists($tempPath)) {
+                return;
+            }
 
-        if ($sizeAfter < $sizeBefore) {
-            rename($tempPath, $this->fullPath);
-        } else {
-            unlink($tempPath);
+            $sizeAfter = filesize($tempPath);
+
+            if ($sizeAfter < $sizeBefore) {
+                rename($tempPath, $this->fullPath);
+            } else {
+                @unlink($tempPath);
+            }
+        } catch (\Throwable $e) {
+            @unlink($tempPath);
+            throw $e;
         }
     }
 
@@ -180,6 +186,6 @@ final class ImageOptimizer
     {
         $info = pathinfo($originalPath);
 
-        return $info['dirname'] . '/' . $info['filename'] . '.' . $format;
+        return $info['dirname'].'/'.$info['filename'].'.'.$format;
     }
 }
