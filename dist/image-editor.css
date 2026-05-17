@@ -1,1 +1,102 @@
-#ie-toolbar{align-items:center;gap:12px;padding:0 12px 8px;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;font-size:14px;display:flex}#ie-toolbar label{color:var(--color-base-text,#374151);font-weight:500}#ic-format{border:1px solid var(--color-base-300,#d1d5db);background:var(--color-base-100,#fff);color:var(--color-base-text,#374151);cursor:pointer;border-radius:6px;padding:4px 8px;font-size:13px}#ie-container{width:100%;height:85vh}.FIE_tab-label{text-align:center}
+#ie-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px 8px;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+}
+
+#ie-toolbar label {
+    color: var(--color-base-text, #374151);
+    font-weight: 500;
+}
+
+#ic-format {
+    padding: 4px 8px;
+    border: 1px solid var(--color-base-300, #d1d5db);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--color-base-100, #fff);
+    color: var(--color-base-text, #374151);
+    cursor: pointer;
+}
+
+#ie-container {
+    width: 100%;
+    height: 85vh;
+}
+
+.FIE_tab-label {
+    text-align: center;
+}
+
+/* ── Batch Processing ── */
+.ie-batch{display:flex;flex-direction:column;gap:24px}
+.ie-batch h2{font-size:18px;font-weight:600;margin:0;color:currentColor}
+.ie-batch-box{border:1px solid #d1d5db;border-radius:8px;padding:20px;background:#fff;color:#374151}
+.ie-batch-row{display:flex;align-items:center;gap:12px}
+.ie-batch-label{display:block;font-size:14px;font-weight:500;margin-bottom:6px;color:currentColor}
+.ie-batch-select{border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:14px;min-width:300px;background:#fff;color:#374151}
+.ie-batch-btn{display:inline-flex;align-items:center;gap:8px;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:14px;font-weight:500;cursor:pointer}
+.ie-batch-btn--scan{background:#4f46e5}
+.ie-batch-btn--start{background:#7c3aed}
+.ie-batch-btn:disabled{opacity:.6;cursor:not-allowed}
+.ie-batch-btn:hover:not(:disabled){filter:brightness(1.1)}
+.ie-batch-count{font-size:14px;color:#6b7280}
+.ie-batch-progress-head{display:flex;justify-content:space-between;margin-bottom:10px}
+.ie-batch-progress-label{font-size:14px;font-weight:500;color:currentColor}
+.ie-batch-progress-pct{font-size:14px;font-weight:600;color:currentColor}
+.ie-batch-track{height:12px;width:100%;background:#e5e7eb;border-radius:9999px;overflow:hidden}
+.ie-batch-fill{height:100%;border-radius:9999px;transition:width .5s,background .3s}
+.ie-batch-fill--active{background:#4f46e5}
+.ie-batch-fill--done{background:#22c55e}
+.ie-batch-status{margin-top:8px;display:flex;gap:16px}
+.ie-batch-complete{font-size:14px;font-weight:500;color:#16a34a}
+.ie-batch-failed{font-size:14px;color:#dc2626}
+.ie-batch-log-head{display:flex;justify-content:space-between;margin-bottom:12px}
+.ie-batch-log-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#6b7280}
+.ie-batch-log-clear{font-size:12px;color:#6b7280;background:none;border:none;cursor:pointer}
+.ie-batch-log-clear:hover{color:#dc2626}
+.ie-batch-log{max-height:400px;overflow-y:auto;background:#f9fafb;border-radius:6px;padding:12px;font-family:monospace;font-size:12px}
+.ie-batch-entry{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #e5e7eb;color:#374151}
+.ie-batch-entry:last-child{border-bottom:none}
+.ie-batch-entry--success{color:#15803d}
+.ie-batch-entry--error{color:#dc2626}
+.ie-batch-entry--warning{color:#a16207}
+.ie-batch-entry--skipped{color:#a16207}
+.ie-batch-time{color:#9ca3af;flex-shrink:0}
+.ie-batch-badge{flex-shrink:0;width:60px;text-align:center;border-radius:4px;font-size:11px;font-weight:600;padding:1px 4px}
+.ie-batch-badge--success{background:#dcfce7;color:#15803d}
+.ie-batch-badge--error{background:#fee2e2;color:#dc2626}
+.ie-batch-badge--skipped{background:#fef9c3;color:#a16207}
+.ie-batch-badge--warning{background:#fef9c3;color:#a16207}
+.ie-batch-empty{color:#9ca3af;text-align:center;padding:16px 0}
+.ie-batch-spin{width:16px;height:16px;animation:ie-spin 1s linear infinite}
+.ie-batch[x-cloak]{display:none!important}
+@keyframes ie-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* ── Dark Mode ── */
+html.dark .ie-batch-box{background:#1e293b;border-color:#334155;color:#e2e8f0}
+html.dark .ie-batch-select{background:#1e293b;border-color:#475569;color:#e2e8f0}
+html.dark .ie-batch-count{color:#94a3b8}
+html.dark .ie-batch-track{background:#334155}
+html.dark .ie-batch-progress-label,
+html.dark .ie-batch-progress-pct{color:#e2e8f0}
+html.dark .ie-batch-log{background:#0f172a;border:1px solid #1e293b}
+html.dark .ie-batch-entry{border-bottom-color:#1e293b;color:#e2e8f0}
+html.dark .ie-batch-entry--success{color:#4ade80}
+html.dark .ie-batch-entry--error{color:#f87171}
+html.dark .ie-batch-entry--warning{color:#fbbf24}
+html.dark .ie-batch-entry--skipped{color:#fbbf24}
+html.dark .ie-batch-time{color:#64748b}
+html.dark .ie-batch-badge--success{background:#052e16;color:#4ade80}
+html.dark .ie-batch-badge--error{background:#450a0a;color:#f87171}
+html.dark .ie-batch-badge--skipped{background:#422006;color:#fbbf24}
+html.dark .ie-batch-badge--warning{background:#422006;color:#fbbf24}
+html.dark .ie-batch-log-title{color:#94a3b8}
+html.dark .ie-batch-log-clear{color:#94a3b8}
+html.dark .ie-batch-log-clear:hover{color:#f87171}
+html.dark .ie-batch-empty{color:#64748b}
+html.dark .ie-batch-complete{color:#4ade80}
+html.dark .ie-batch-failed{color:#f87171}

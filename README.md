@@ -10,6 +10,8 @@ Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered
 - Format selector (PNG/JPG) in modal toolbar — defaults to original format, separate from editor
 - **Automatic optimization on upload** via Media Manager events — images are optimized and converted when uploaded through the file manager
 - **Automatic cleanup on delete** — WebP/AVIF conversions are removed when the source image is deleted
+- **Admin settings page** — manage optimization quality, conversion toggles, and queue settings directly from MoonShine panel (stored in DB)
+- **Batch optimization** — scan and re-process existing images with real-time progress bar, detailed logs (webp vs original, avif vs webp), and file filter
 - Optimization with size comparison (keeps smaller version)
 - Optional WebP/AVIF conversion with size-aware cleanup
 - Queue support for async processing
@@ -67,6 +69,12 @@ Or everything at once:
 
 ```bash
 php artisan vendor:publish --tag=image-editor-assets --tag=image-editor-config --tag=image-editor-lang --force
+```
+
+Run migrations (creates `image_editor_settings` table):
+
+```bash
+php artisan migrate
 ```
 
 ## Setup
@@ -137,6 +145,8 @@ return [
 > **Note:** GD cannot optimize PNG effectively — it often makes files larger. Imagick is strongly recommended for PNG support.
 
 ## Configuration
+
+Settings can be managed from the **MoonShine admin panel** (recommended) or via the config file. Database settings override config values at runtime.
 
 Publish the config file (optional):
 
@@ -248,6 +258,61 @@ Optimized file  ≥ original size?  → keep original
 WebP            ≥ original size?  → delete WebP
 AVIF            ≥ WebP size?      → delete AVIF
   (or ≥ original if no WebP)
+```
+
+### Admin Settings Page
+
+The package adds a **"Image Editor Settings"** page to the MoonShine sidebar with two tabs:
+
+#### Settings Tab
+
+Configure optimization and conversion parameters stored in the database:
+
+- **Quality** — JPG, WebP, AVIF quality (1–100)
+- **Conversion** — enable/disable WebP and AVIF generation
+- **Optimization** — strip metadata, max width/height
+- **Queue** — enable async processing, delay
+
+Settings are applied to the config at runtime on each request, so changes take effect immediately without editing config files.
+
+#### Batch Optimization Tab
+
+Re-process existing images with current settings:
+
+1. Choose filter: **All images** (recreate conversions) or **Only without conversions** (skip files that already have webp/avif)
+2. Scan files — shows count of matching originals (jpg/png/gif)
+3. Start processing — runs via Laravel `Bus::batch` on the `images` queue
+4. Real-time progress bar with processed/total counter
+5. Detailed log showing per-file results:
+   - Original: `photo.jpg (100 KB → 95 KB, -5%)`
+   - WebP conversion: `→ photo.webp (95 KB → 50 KB, -47.4%, vs original)`
+   - AVIF conversion: `→ photo.avif (50 KB → 30 KB, -40%, vs webp)`
+   - Automatic deletion: `→ photo.webp deleted (larger than original)`
+
+### Queue Worker Setup
+
+For batch processing (and async optimization), run a queue worker:
+
+```bash
+php artisan queue:work --queue=images
+```
+
+For production, use Supervisor to keep the worker running:
+
+```ini
+# /etc/supervisor/conf.d/moonshine-worker.conf
+[program:moonshine-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/moonshine/artisan queue:work --queue=images --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=http
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/moonshine/storage/logs/worker.log
+stopwaitsecs=3600
 ```
 
 ### Format Conversion Flow

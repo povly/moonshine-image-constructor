@@ -6,19 +6,25 @@ namespace Povly\MoonShineImageEditor;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
+use MoonShine\Contracts\MenuManager\MenuManagerContract;
+use MoonShine\MenuManager\MenuItem;
 use Povly\MoonShineImageEditor\Listeners\DeleteImageConversions;
 use Povly\MoonShineImageEditor\Listeners\OptimizeUploadedImage;
+use Povly\MoonShineImageEditor\Pages\ImageSettingsPage;
+use Povly\MoonShineImageEditor\Services\SettingsService;
 use YuriZoom\MoonShineMediaManager\Contracts\MediaManagerRegistryInterface;
 use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileDeleted;
 use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileUploaded;
 
 class ImageEditorServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function boot(CoreContract $core, MenuManagerContract $menu): void
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'image-editor');
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'image-editor');
         $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->mergeConfigFrom(__DIR__.'/../config/image-editor.php', 'moonshine.image_editor');
 
         $this->publishes([
@@ -47,6 +53,27 @@ class ImageEditorServiceProvider extends ServiceProvider
 
         Event::listen(MediaManagerFileUploaded::class, OptimizeUploadedImage::class);
         Event::listen(MediaManagerFileDeleted::class, DeleteImageConversions::class);
+
+        $this->app->singleton(SettingsService::class);
+
+        $core->pages([
+            ImageSettingsPage::class,
+        ]);
+
+        $menu->add([
+            MenuItem::make(ImageSettingsPage::class, __('image-editor::image-editor.menu_title'))->icon('cog'),
+        ]);
+    }
+
+    public function register(): void
+    {
+        $this->app->booted(function (): void {
+            try {
+                app(SettingsService::class)->applyToConfig();
+            } catch (\Throwable) {
+                // Settings table may not exist yet during migration
+            }
+        });
     }
 
     public static function renderModal(): string

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor\Services;
 
 use Intervention\Image\Laravel\Facades\Image;
-use Illuminate\Support\Facades\Log;
 
 final class ImageOptimizer
 {
@@ -18,11 +17,13 @@ final class ImageOptimizer
     {
         $this->optimize();
 
-        if ($this->config['convert']['webp']['enabled'] ?? false) {
+        $sourceFormat = strtolower(pathinfo($this->fullPath, PATHINFO_EXTENSION));
+
+        if ($sourceFormat !== 'webp' && ($this->config['convert']['webp']['enabled'] ?? false)) {
             $this->convertWebp();
         }
 
-        if ($this->config['convert']['avif']['enabled'] ?? false) {
+        if ($sourceFormat !== 'avif' && ($this->config['convert']['avif']['enabled'] ?? false)) {
             $this->convertAvif();
         }
     }
@@ -69,7 +70,9 @@ final class ImageOptimizer
 
     public function optimize(): void
     {
-        if (! ($this->config['optimize']['enabled'] ?? true)) {
+        $extension = strtolower(pathinfo($this->fullPath, PATHINFO_EXTENSION));
+
+        if (! in_array($extension, ['jpg', 'jpeg', 'png'])) {
             return;
         }
 
@@ -84,7 +87,6 @@ final class ImageOptimizer
             $image = $image->scaleDown(width: $maxWidth, height: $maxHeight);
         }
 
-        $extension = strtolower(pathinfo($this->fullPath, PATHINFO_EXTENSION));
         $stripMetadata = $this->config['optimize']['strip_metadata'] ?? true;
         $quality = $this->config['quality'][$extension] ?? 85;
 
@@ -106,23 +108,10 @@ final class ImageOptimizer
         $encoded->save($tempPath);
 
         if (! file_exists($tempPath)) {
-            Log::warning('[ImageEditor] optimize: temp file not created', [
-                'path' => $this->fullPath,
-                'extension' => $extension,
-            ]);
-
             return;
         }
 
         $sizeAfter = filesize($tempPath);
-
-        Log::info('[ImageEditor] optimize', [
-            'path' => basename($this->fullPath),
-            'extension' => $extension,
-            'before_bytes' => $sizeBefore,
-            'after_bytes' => $sizeAfter,
-            'saved_percent' => round((1 - $sizeAfter / $sizeBefore) * 100, 2),
-        ]);
 
         if ($sizeAfter < $sizeBefore) {
             rename($tempPath, $this->fullPath);
