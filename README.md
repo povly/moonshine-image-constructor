@@ -34,19 +34,19 @@ composer require povly/moonshine-image-editor
 Publish assets:
 
 ```bash
-php artisan vendor:publish --tag=image-constructor-assets
+php artisan vendor:publish --tag=image-editor-assets
 ```
 
 Optionally publish config and translations:
 
 ```bash
-php artisan vendor:publish --tag=image-constructor-config --tag=image-constructor-lang --force
+php artisan vendor:publish --tag=image-editor-config --tag=image-editor-lang --force
 ```
 
 Or everything at once:
 
 ```bash
-php artisan vendor:publish --tag=image-constructor-assets --tag=image-constructor-config --tag=image-constructor-lang --force
+php artisan vendor:publish --tag=image-editor-assets --tag=image-editor-config --tag=image-editor-lang --force
 ```
 
 ## Setup
@@ -63,9 +63,9 @@ protected function assets(): array
 {
     return [
         ...parent::assets(),
-        Css::make('/vendor/image-constructor/image-constructor.css'),
-        Js::make('/vendor/image-constructor/filerobot-image-editor.min.js'),
-        Js::make('/vendor/image-constructor/image-constructor.js'),
+        Css::make('/vendor/image-editor/image-editor.css'),
+        Js::make('/vendor/image-editor/filerobot-image-editor.min.js'),
+        Js::make('/vendor/image-editor/image-editor.js'),
     ];
 }
 ```
@@ -76,14 +76,14 @@ Add the modal to your layout's `getContentComponents()` method:
 
 ```php
 use MoonShine\UI\Components\FlexibleRender;
-use Povly\MoonShineImageConstructor\ImageConstructorServiceProvider;
+use Povly\MoonShineImageEditor\ImageEditorServiceProvider;
 
 protected function getContentComponents(): array
 {
     return [
         ...parent::getContentComponents(),
         FlexibleRender::make(
-            ImageConstructorServiceProvider::renderModal(),
+            ImageEditorServiceProvider::renderModal(),
         ),
     ];
 }
@@ -121,11 +121,11 @@ return [
 Publish the config file (optional):
 
 ```bash
-php artisan vendor:publish --tag=image-constructor-config
+php artisan vendor:publish --tag=image-editor-config
 ```
 
 ```php
-// config/moonshine/image_constructor.php
+// config/moonshine/image_editor.php
 return [
     'available_formats' => ['png', 'jpg'],
     'quality' => ['jpg' => 82],
@@ -185,10 +185,10 @@ Translations are loaded from the package automatically. Supported languages:
 To override translations, publish them:
 
 ```bash
-php artisan vendor:publish --tag=image-constructor-lang
+php artisan vendor:publish --tag=image-editor-lang
 ```
 
-Files will be published to `lang/vendor/image-constructor/en/` and `lang/vendor/image-constructor/ru/`.
+Files will be published to `lang/vendor/image-editor/en/` and `lang/vendor/image-editor/ru/`.
 
 ## How It Works
 
@@ -243,9 +243,9 @@ Filerobot always exports PNG regardless of the user's format choice. The server 
 
 | Tag | Description |
 |-----|-------------|
-| `image-constructor-assets` | JS and CSS files to `public/vendor/image-constructor/` |
-| `image-constructor-config` | Config to `config/moonshine/image_constructor.php` |
-| `image-constructor-lang` | Translations to `lang/vendor/image-constructor/` |
+| `image-editor-assets` | JS and CSS files to `public/vendor/image-editor/` |
+| `image-editor-config` | Config to `config/moonshine/image_editor.php` |
+| `image-editor-lang` | Translations to `lang/vendor/image-editor/` |
 
 ## License
 
