@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use YuriZoom\MoonShineImageConstructor\Controllers\ImageConstructorController;
+use Povly\MoonShineImageConstructor\Controllers\ImageConstructorController;
 
 $middleware = config('moonshine.auth.middleware');
 $middleware = is_array($middleware) ? $middleware : [$middleware];
