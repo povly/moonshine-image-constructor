@@ -24,7 +24,7 @@ class ImageConstructorServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../dist/filerobot-image-editor.min.js' => public_path('vendor/image-constructor/filerobot-image-editor.min.js'),
             __DIR__.'/../dist/image-constructor.js' => public_path('vendor/image-constructor/image-constructor.js'),
-            __DIR__.'/../resources/css/image-constructor.css' => public_path('vendor/image-constructor/image-constructor.css'),
+            __DIR__.'/../dist/image-constructor.css' => public_path('vendor/image-constructor/image-constructor.css'),
         ], 'image-constructor-assets');
 
         $this->publishes([
