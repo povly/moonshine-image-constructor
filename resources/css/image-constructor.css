@@ -8,16 +8,17 @@
 }
 
 #ie-toolbar label {
-    color: #374151;
+    color: var(--color-base-text, #374151);
     font-weight: 500;
 }
 
 #ic-format {
     padding: 4px 8px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--color-base-300, #d1d5db);
     border-radius: 6px;
     font-size: 13px;
-    background: #fff;
+    background: var(--color-base-100, #fff);
+    color: var(--color-base-text, #374151);
     cursor: pointer;
 }
 
