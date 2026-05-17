@@ -2,10 +2,15 @@
 
 declare(strict_types=1);
 
-namespace YuriZoom\MoonShineImageConstructor;
+namespace Povly\MoonShineImageConstructor;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Povly\MoonShineImageConstructor\Listeners\DeleteImageConversions;
+use Povly\MoonShineImageConstructor\Listeners\OptimizeUploadedImage;
 use YuriZoom\MoonShineMediaManager\Contracts\MediaManagerRegistryInterface;
+use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileDeleted;
+use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileUploaded;
 
 class ImageConstructorServiceProvider extends ServiceProvider
 {
@@ -19,7 +24,12 @@ class ImageConstructorServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../dist/filerobot-image-editor.min.js' => public_path('vendor/image-constructor/filerobot-image-editor.min.js'),
             __DIR__.'/../dist/image-constructor.js' => public_path('vendor/image-constructor/image-constructor.js'),
+            __DIR__.'/../resources/css/image-constructor.css' => public_path('vendor/image-constructor/image-constructor.css'),
         ], 'image-constructor-assets');
+
+        $this->publishes([
+            __DIR__.'/../config/image-constructor.php' => config_path('moonshine/image_constructor.php'),
+        ], 'image-constructor-config');
 
         $this->publishes([
             __DIR__.'/../lang' => lang_path('vendor/image-constructor'),
@@ -34,6 +44,9 @@ class ImageConstructorServiceProvider extends ServiceProvider
                 'click' => '$store.ic.open(file)',
             ]);
         });
+
+        Event::listen(MediaManagerFileUploaded::class, OptimizeUploadedImage::class);
+        Event::listen(MediaManagerFileDeleted::class, DeleteImageConversions::class);
     }
 
     public static function renderModal(): string
@@ -49,8 +62,8 @@ class ImageConstructorServiceProvider extends ServiceProvider
 
         $config = [
             'saveUrl' => route('moonshine.image-constructor.save'),
-            'defaultSaveType' => config('moonshine.image_constructor.default_save_type', 'png'),
-            'defaultSaveQuality' => config('moonshine.image_constructor.default_save_quality', 92),
+            'availableFormats' => config('moonshine.image_constructor.available_formats', ['png', 'jpg']),
+            'quality' => config('moonshine.image_constructor.quality', ['jpg' => 85, 'png' => 92]),
             'tabs' => config('moonshine.image_constructor.default_tabs'),
             'defaultTab' => config('moonshine.image_constructor.default_tab'),
             'defaultTool' => config('moonshine.image_constructor.default_tool'),
