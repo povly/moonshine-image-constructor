@@ -1,5 +1,7 @@
 # MoonShine Image Editor
 
+![Preview](resources/images/preview.jpg)
+
 Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered by [Filerobot Image Editor](https://github.com/scaleflex/filerobot-image-editor). Integrates with [MoonShine Media Manager](https://github.com/yurizoom/moonshine-media-manager) to provide in-browser image editing with automatic optimization and WebP/AVIF conversion.
 
 ## Features
