@@ -1,8 +1,8 @@
 {
-    "name": "povly/moonshine-image-constructor",
+    "name": "povly/moonshine-image-editor",
     "type": "library",
     "description": "Image editor for MoonShine Media Manager powered by Filerobot",
-    "keywords": ["moonshine", "image", "editor", "constructor", "filerobot"],
+    "keywords": ["moonshine", "image", "editor", "filerobot", "webp", "avif", "optimization"],
     "license": "MIT",
     "authors": [
         {

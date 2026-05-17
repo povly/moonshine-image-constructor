@@ -1,4 +1,4 @@
-# MoonShine Image Constructor
+# MoonShine Image Editor
 
 Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered by [Filerobot Image Editor](https://github.com/scaleflex/filerobot-image-editor). Integrates with [MoonShine Media Manager](https://github.com/yurizoom/moonshine-media-manager) to provide in-browser image editing with automatic optimization and WebP/AVIF conversion.
 
@@ -28,7 +28,7 @@ Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered
 ## Installation
 
 ```bash
-composer require povly/moonshine-image-constructor
+composer require povly/moonshine-image-editor
 ```
 
 Publish assets:
