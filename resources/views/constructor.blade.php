@@ -8,7 +8,7 @@
 
 <x-moonshine::modal
     name="image-constructor"
-    title="Image Editor"
+    title="{{ __('image-constructor::image-constructor.image_editor') }}"
     :wide="true"
 >
     <div id="ie-container" style="width: 100%; height: 85vh;"></div>

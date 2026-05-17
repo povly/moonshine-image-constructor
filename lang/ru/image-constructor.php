@@ -1158,4 +1158,8 @@ Cmd/Ctrl + C / V: copy / paste layers or selection
     'toast_saved' => 'Изображение сохранено',
     'toast_save_failed' => 'Ошибка сохранения изображения',
     'toast_editor_not_loaded' => 'Редактор изображений не загружен',
+
+    // Интерфейс
+    'edit_image' => 'Редактировать',
+    'image_editor' => 'Редактор изображений',
 ];

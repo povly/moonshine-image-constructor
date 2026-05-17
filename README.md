@@ -1,6 +1,6 @@
 # MoonShine Image Constructor
 
-Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered by [Filerobot Image Editor](https://github.com/scaleflex/filerobot-image-editor). Integrates with [MoonShine Media Manager](https://github.com/povly/moonshine-media-manager) to provide in-browser image editing.
+Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered by [Filerobot Image Editor](https://github.com/scaleflex/filerobot-image-editor). Integrates with [MoonShine Media Manager](https://github.com/yurizoom/moonshine-media-manager) to provide in-browser image editing.
 
 ## Features
 
@@ -15,7 +15,7 @@ Image editor for [MoonShine](https://moonshine-laravel.com/) admin panel powered
 - PHP 8.2+
 - Laravel 11+ / 12+
 - MoonShine 4.x
-- `povly/moonshine-media-manager` ^4.0
+- `yurizoom/moonshine-media-manager` ^4.0
 
 ## Installation
 

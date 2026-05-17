@@ -25,22 +25,15 @@ class ImageConstructorServiceProvider extends ServiceProvider
             __DIR__.'/../lang' => lang_path('vendor/image-constructor'),
         ], 'image-constructor-lang');
 
-        $this->registerMediaManagerButton();
-    }
-
-    private function registerMediaManagerButton(): void
-    {
-        if (! interface_exists(MediaManagerRegistryInterface::class)) {
-            return;
-        }
-
-        app(MediaManagerRegistryInterface::class)->addFileAction('image-constructor', [
-            'icon' => 'sparkles',
-            'class' => 'btn-sm btn-accent',
-            'label' => 'Edit Image',
-            'x-show' => '!file.isDir && file.type === "image"',
-            'click' => '$store.ic.open(file)',
-        ]);
+        $this->app->resolving(MediaManagerRegistryInterface::class, function (MediaManagerRegistryInterface $registry): void {
+            $registry->addFileAction('image-constructor', [
+                'icon' => 'sparkles',
+                'class' => 'btn-sm btn-accent',
+                'label' => __('image-constructor::image-constructor.edit_image'),
+                'x-show' => '!file.isDir && file.type === "image"',
+                'click' => '$store.ic.open(file)',
+            ]);
+        });
     }
 
     public static function renderModal(): string

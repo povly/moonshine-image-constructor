@@ -1158,4 +1158,8 @@ Cmd/Ctrl + C / V: copy / paste layers or selection
     'toast_saved' => 'Image saved successfully',
     'toast_save_failed' => 'Failed to save image',
     'toast_editor_not_loaded' => 'Image editor not loaded',
+
+    // UI labels
+    'edit_image' => 'Edit Image',
+    'image_editor' => 'Image Editor',
 ];
