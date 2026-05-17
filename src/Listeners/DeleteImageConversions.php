@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Povly\MoonShineImageConstructor\Listeners;
+namespace Povly\MoonShineImageEditor\Listeners;
 
 use Illuminate\Support\Facades\Storage;
 use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileDeleted;

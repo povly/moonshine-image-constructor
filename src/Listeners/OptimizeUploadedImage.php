@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Povly\MoonShineImageConstructor\Listeners;
+namespace Povly\MoonShineImageEditor\Listeners;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Povly\MoonShineImageConstructor\Services\ImageOptimizer;
+use Povly\MoonShineImageEditor\Services\ImageOptimizer;
 use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileUploaded;
 
 final class OptimizeUploadedImage
@@ -27,17 +27,17 @@ final class OptimizeUploadedImage
         }
 
         $config = [
-            'quality' => config('moonshine.image_constructor.quality', []),
-            'optimize' => config('moonshine.image_constructor.optimize', []),
-            'convert' => config('moonshine.image_constructor.convert', []),
+            'quality' => config('moonshine.image_editor.quality', []),
+            'optimize' => config('moonshine.image_editor.optimize', []),
+            'convert' => config('moonshine.image_editor.convert', []),
         ];
 
-        if (config('moonshine.image_constructor.queue.enabled', false)) {
-            $connection = config('moonshine.image_constructor.queue.connection');
-            $queue = config('moonshine.image_constructor.queue.queue', 'images');
-            $delay = config('moonshine.image_constructor.queue.delay');
+        if (config('moonshine.image_editor.queue.enabled', false)) {
+            $connection = config('moonshine.image_editor.queue.connection');
+            $queue = config('moonshine.image_editor.queue.queue', 'images');
+            $delay = config('moonshine.image_editor.queue.delay');
 
-            $job = new \Povly\MoonShineImageConstructor\Jobs\ProcessEditedImage(
+            $job = new \Povly\MoonShineImageEditor\Jobs\ProcessEditedImage(
                 $fullPath,
                 $event->path,
                 $event->disk,

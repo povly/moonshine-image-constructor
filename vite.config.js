@@ -9,8 +9,8 @@ export default defineConfig({
         emptyOutDir: false,
         rollupOptions: {
             input: [
-                'resources/js/image-constructor.js',
-                'resources/css/image-constructor.css',
+                'resources/js/image-editor.js',
+                'resources/css/image-editor.css',
             ],
             output: {
                 entryFileNames: '[name].js',

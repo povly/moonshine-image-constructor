@@ -19,13 +19,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Povly\\MoonShineImageConstructor\\": "src/"
+            "Povly\\MoonShineImageEditor\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Povly\\MoonShineImageConstructor\\ImageConstructorServiceProvider"
+                "Povly\\MoonShineImageEditor\\ImageEditorServiceProvider"
             ]
         }
     }

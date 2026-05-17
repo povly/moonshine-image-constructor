@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Povly\MoonShineImageConstructor\Controllers;
+namespace Povly\MoonShineImageEditor\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
-use Povly\MoonShineImageConstructor\Jobs\ProcessEditedImage;
-use Povly\MoonShineImageConstructor\Services\ImageOptimizer;
+use Povly\MoonShineImageEditor\Jobs\ProcessEditedImage;
+use Povly\MoonShineImageEditor\Services\ImageOptimizer;
 
-class ImageConstructorController extends Controller
+class ImageEditorController extends Controller
 {
     public function save(Request $request): JsonResponse
     {
@@ -24,7 +24,7 @@ class ImageConstructorController extends Controller
         $sourcePath = $request->input('source_path');
         $image = $request->file('image');
         $targetFormat = strtolower($request->input('target_format', 'png'));
-        $overwrite = config('moonshine.image_constructor.overwrite_original', false);
+        $overwrite = config('moonshine.image_editor.overwrite_original', false);
 
         $disk = config('moonshine.media_manager.disk', 'public');
         $storage = Storage::disk($disk);
@@ -99,10 +99,10 @@ class ImageConstructorController extends Controller
 
         $optimizerConfig = $this->getOptimizerConfig();
 
-        if (config('moonshine.image_constructor.queue.enabled', false)) {
-            $connection = config('moonshine.image_constructor.queue.connection');
-            $queue = config('moonshine.image_constructor.queue.queue', 'images');
-            $delay = config('moonshine.image_constructor.queue.delay');
+        if (config('moonshine.image_editor.queue.enabled', false)) {
+            $connection = config('moonshine.image_editor.queue.connection');
+            $queue = config('moonshine.image_editor.queue.queue', 'images');
+            $delay = config('moonshine.image_editor.queue.delay');
 
             $job = new ProcessEditedImage($fullPath, $relativePath, $disk, $optimizerConfig);
 
@@ -126,9 +126,9 @@ class ImageConstructorController extends Controller
     private function getOptimizerConfig(): array
     {
         return [
-            'quality' => config('moonshine.image_constructor.quality', []),
-            'optimize' => config('moonshine.image_constructor.optimize', []),
-            'convert' => config('moonshine.image_constructor.convert', []),
+            'quality' => config('moonshine.image_editor.quality', []),
+            'optimize' => config('moonshine.image_editor.optimize', []),
+            'convert' => config('moonshine.image_editor.convert', []),
         ];
     }
 }

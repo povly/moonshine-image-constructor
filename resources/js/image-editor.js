@@ -1,6 +1,6 @@
 (function () {
     function toastMsg(key) {
-        var config = window.ImageConstructorConfig || {};
+        var config = window.ImageEditorConfig || {};
         var msgs = config.toastMessages || {};
         return msgs[key] || key;
     }
@@ -38,7 +38,7 @@
 
                 setFormatDefault(getSourceFormat(file));
 
-                window.MoonShine?.ui?.toggleModal('image-constructor');
+                window.MoonShine?.ui?.toggleModal('image-editor');
                 await new Promise((r) => setTimeout(r, 300));
 
                 const container = document.getElementById('ie-container');
@@ -54,7 +54,7 @@
                     return;
                 }
 
-                const config = window.ImageConstructorConfig || {};
+                const config = window.ImageEditorConfig || {};
                 const locale = config.locale || 'en';
                 const translations = config.translations || {};
 
@@ -127,7 +127,7 @@
             },
 
             async _saveToServer(editedImageObject, targetFormat) {
-                const config = window.ImageConstructorConfig || {};
+                const config = window.ImageEditorConfig || {};
 
                 try {
                     const base64 = editedImageObject.imageBase64;
@@ -176,7 +176,7 @@
                     container.innerHTML = '';
                 }
 
-                window.MoonShine?.ui?.toggleModal('image-constructor');
+                window.MoonShine?.ui?.toggleModal('image-editor');
             },
 
             _terminate() {

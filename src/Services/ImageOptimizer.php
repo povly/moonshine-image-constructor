@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Povly\MoonShineImageConstructor\Services;
+namespace Povly\MoonShineImageEditor\Services;
 
 use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Log;
@@ -106,7 +106,7 @@ final class ImageOptimizer
         $encoded->save($tempPath);
 
         if (! file_exists($tempPath)) {
-            Log::warning('[ImageConstructor] optimize: temp file not created', [
+            Log::warning('[ImageEditor] optimize: temp file not created', [
                 'path' => $this->fullPath,
                 'extension' => $extension,
             ]);
@@ -116,7 +116,7 @@ final class ImageOptimizer
 
         $sizeAfter = filesize($tempPath);
 
-        Log::info('[ImageConstructor] optimize', [
+        Log::info('[ImageEditor] optimize', [
             'path' => basename($this->fullPath),
             'extension' => $extension,
             'before_bytes' => $sizeBefore,

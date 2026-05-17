@@ -2,15 +2,15 @@
     'config' => [],
 ])
 
-<script>window.ImageConstructorConfig = {{ Js::from($config) }};</script>
+<script>window.ImageEditorConfig = {{ Js::from($config) }};</script>
 
 <x-moonshine::modal
-    name="image-constructor"
-    title="{{ __('image-constructor::image-constructor.image_editor') }}"
+    name="image-editor"
+    title="{{ __('image-editor::image-editor.image_editor') }}"
     :wide="true"
 >
     <div id="ie-toolbar">
-        <label for="ic-format">{{ __('image-constructor::image-constructor.save_as') }}:</label>
+        <label for="ic-format">{{ __('image-editor::image-editor.save_as') }}:</label>
         <select id="ic-format">
             @foreach($config['available_formats'] ?? ['png', 'jpg'] as $fmt)
                 <option value="{{ $fmt }}">{{ strtoupper($fmt) }}</option>

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Povly\MoonShineImageConstructor\Jobs;
+namespace Povly\MoonShineImageEditor\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Povly\MoonShineImageConstructor\Services\ImageOptimizer;
+use Povly\MoonShineImageEditor\Services\ImageOptimizer;
 
 final class ProcessEditedImage implements ShouldQueue
 {
