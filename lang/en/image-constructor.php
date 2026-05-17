@@ -1162,4 +1162,5 @@ Cmd/Ctrl + C / V: copy / paste layers or selection
     // UI labels
     'edit_image' => 'Edit Image',
     'image_editor' => 'Image Editor',
+    'save_as' => 'Save as',
 ];

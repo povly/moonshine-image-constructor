@@ -1162,4 +1162,5 @@ Cmd/Ctrl + C / V: copy / paste layers or selection
     // Интерфейс
     'edit_image' => 'Редактировать',
     'image_editor' => 'Редактор изображений',
+    'save_as' => 'Сохранить как',
 ];
