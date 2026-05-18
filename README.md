@@ -98,23 +98,33 @@ protected function assets(): array
 }
 ```
 
+> **Note:** The built-in **Image Editor Settings** page automatically registers these assets when loaded, so you only need this step if you want the editor modal available on other pages (e.g., Media Manager).
+
 ### 2. Render the editor modal
 
 Add the modal to your layout's `getContentComponents()` method:
 
 ```php
 use MoonShine\UI\Components\FlexibleRender;
-use Povly\MoonShineImageEditor\ImageEditorServiceProvider;
+use Povly\MoonShineImageEditor\Support\ImageEditorRenderer;
 
 protected function getContentComponents(): array
 {
     return [
         ...parent::getContentComponents(),
         FlexibleRender::make(
-            ImageEditorServiceProvider::renderModal(),
+            app(ImageEditorRenderer::class)->renderModal(),
         ),
     ];
 }
+```
+
+Alternatively, the legacy static helper still works:
+
+```php
+FlexibleRender::make(
+    \Povly\MoonShineImageEditor\ImageEditorServiceProvider::renderModal(),
+);
 ```
 
 The "Edit Image" button automatically appears in the Media Manager for image files. The listeners for upload optimization and delete cleanup are registered automatically — no additional setup required.
@@ -166,8 +176,8 @@ return [
         'max_height' => null,
     ],
     'convert' => [
-        'webp' => ['enabled' => true, 'quality' => 80],
-        'avif' => ['enabled' => true, 'quality' => 65],
+        'webp' => ['enabled' => false, 'quality' => 80],
+        'avif' => ['enabled' => false, 'quality' => 65],
     ],
     'queue' => [
         'enabled' => false,
@@ -195,9 +205,9 @@ return [
 | `optimize.strip_metadata` | `true` | Strip EXIF/IPTC metadata |
 | `optimize.max_width` | `null` | Max width (keeps aspect ratio) |
 | `optimize.max_height` | `null` | Max height (keeps aspect ratio) |
-| `convert.webp.enabled` | `true` | Generate WebP version |
+| `convert.webp.enabled` | `false` | Generate WebP version |
 | `convert.webp.quality` | `80` | WebP quality (1–100) |
-| `convert.avif.enabled` | `true` | Generate AVIF version |
+| `convert.avif.enabled` | `false` | Generate AVIF version |
 | `convert.avif.quality` | `65` | AVIF quality (1–100) |
 | `queue.enabled` | `false` | Offload optimization to queue |
 | `queue.delay` | `60` | Delay in seconds before processing |

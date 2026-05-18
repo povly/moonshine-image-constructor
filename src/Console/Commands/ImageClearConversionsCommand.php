@@ -6,6 +6,8 @@ namespace Povly\MoonShineImageEditor\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
+use Povly\MoonShineImageEditor\Support\FileSizeFormatter;
 
 final class ImageClearConversionsCommand extends Command
 {
@@ -35,7 +37,7 @@ final class ImageClearConversionsCommand extends Command
         foreach ($allFiles as $file) {
             $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
-            if (! in_array($ext, ['webp', 'avif'], true)) {
+            if (! in_array($ext, ImageExtension::conversions(), true)) {
                 continue;
             }
 
@@ -44,7 +46,7 @@ final class ImageClearConversionsCommand extends Command
             $baseName = $info['filename'];
 
             $hasOriginal = false;
-            foreach (['jpg', 'jpeg', 'png', 'gif'] as $origExt) {
+            foreach (ImageExtension::sources() as $origExt) {
                 if ($storage->exists("{$dir}/{$baseName}.{$origExt}")) {
                     $hasOriginal = true;
 
@@ -58,10 +60,10 @@ final class ImageClearConversionsCommand extends Command
                 $freedBytes += $size;
 
                 if ($dryRun) {
-                    $this->line("  Would delete: {$file} (" . $this->formatBytes($size) . ')');
+                    $this->line('  Would delete: '.$file.' ('.FileSizeFormatter::format($size).')');
                 } else {
                     $storage->delete($file);
-                    $this->line("  Deleted: {$file}");
+                    $this->line('  Deleted: '.$file);
                 }
             }
         }
@@ -70,22 +72,9 @@ final class ImageClearConversionsCommand extends Command
             $this->info('No orphan conversions found.');
         } else {
             $action = $dryRun ? 'Would delete' : 'Deleted';
-            $this->info("{$action} {$orphanCount} orphan conversion(s), {$this->formatBytes($freedBytes)} freed.");
+            $this->info("{$action} {$orphanCount} orphan conversion(s), ".FileSizeFormatter::format($freedBytes).' freed.');
         }
 
         return self::SUCCESS;
-    }
-
-    private function formatBytes(int $bytes): string
-    {
-        if ($bytes >= 1048576) {
-            return round($bytes / 1048576, 2) . ' MB';
-        }
-
-        if ($bytes >= 1024) {
-            return round($bytes / 1024, 2) . ' KB';
-        }
-
-        return $bytes . ' B';
     }
 }

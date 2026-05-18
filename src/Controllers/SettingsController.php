@@ -9,18 +9,18 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Support\Enums\ToastType;
-use Povly\MoonShineImageEditor\Services\SettingsService;
+use Povly\MoonShineImageEditor\Contracts\SettingsRepositoryInterface;
 
 final class SettingsController extends Controller
 {
     public function __construct(
-        private SettingsService $settingsService,
+        private readonly SettingsRepositoryInterface $settings,
     ) {}
 
     public function load(): JsonResponse
     {
         return response()->json([
-            'settings' => $this->settingsService->getSettings(),
+            'settings' => $this->settings->getSettings(),
         ]);
     }
 
@@ -43,7 +43,7 @@ final class SettingsController extends Controller
         $flat = array_intersect_key($raw, array_flip(self::ALLOWED_SETTINGS_KEYS));
         $settings = $this->unflattenSettings($flat);
 
-        $this->settingsService->saveSettings($settings);
+        $this->settings->saveSettings($settings);
 
         return MoonShineJsonResponse::make()
             ->toast(__('image-editor::image-editor.settings_saved'), ToastType::SUCCESS);

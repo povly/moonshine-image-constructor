@@ -5,36 +5,42 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor\Services;
 
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Povly\MoonShineImageEditor\Contracts\SettingsRepositoryInterface;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
 use Povly\MoonShineImageEditor\Jobs\BatchOptimizeImage;
 
 final class BatchProcessService
 {
-    public function __construct(
-        private SettingsService $settingsService,
-    ) {}
-
     private const MAX_SCAN_FILES = 5000;
+
+    public function __construct(
+        private readonly SettingsRepositoryInterface $settings,
+    ) {}
 
     public function scanFiles(string $disk = 'public', string $filter = 'all'): array
     {
         $storage = Storage::disk($disk);
-        $extensions = ['jpg', 'jpeg', 'png', 'gif'];
 
         $files = collect($storage->allFiles())
-            ->filter(fn (string $file): bool => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), $extensions))
+            ->filter(fn (string $file): bool => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ImageExtension::sources()))
             ->take(self::MAX_SCAN_FILES);
 
         if ($filter === 'only_without_conversions') {
             $files = $files->filter(function (string $file) use ($storage): bool {
                 $info = pathinfo($file);
 
-                $webpPath = $info['dirname'].'/'.$info['filename'].'.webp';
-                $avifPath = $info['dirname'].'/'.$info['filename'].'.avif';
+                foreach (ImageExtension::conversions() as $format) {
+                    $conversionPath = $info['dirname'].'/'.$info['filename'].'.'.$format;
 
-                return ! $storage->exists($webpPath) && ! $storage->exists($avifPath);
+                    if ($storage->exists($conversionPath)) {
+                        return false;
+                    }
+                }
+
+                return true;
             });
         }
 
@@ -44,12 +50,11 @@ final class BatchProcessService
     public function startBatch(array $relativePaths, string $disk = 'public'): string
     {
         $batchId = Str::uuid()->toString();
-        $optimizerConfig = $this->settingsService->getOptimizerConfig();
+        $optimizerConfig = $this->settings->getOptimizerConfig();
         $storage = Storage::disk($disk);
 
         $jobs = [];
         foreach ($relativePaths as $relativePath) {
-            // Reject paths with directory traversal sequences
             $normalized = str_replace('\\', '/', $relativePath);
             if (str_contains($normalized, '..')) {
                 continue;

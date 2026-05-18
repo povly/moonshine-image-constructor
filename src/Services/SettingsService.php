@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Povly\MoonShineImageEditor\Services;
 
-use Povly\MoonShineImageEditor\Jobs\ProcessEditedImage;
+use Povly\MoonShineImageEditor\Contracts\SettingsRepositoryInterface;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
 use Povly\MoonShineImageEditor\Models\ImageEditorSetting;
 
-final class SettingsService
+final class SettingsService implements SettingsRepositoryInterface
 {
     private ?array $cachedSettings = null;
 
@@ -27,7 +28,7 @@ final class SettingsService
 
     public function saveSettings(array $settings): void
     {
-        $this->flattenBooleanStrings($settings);
+        $this->normalizeBooleanStrings($settings);
         $settings = $this->validateSettings($settings);
 
         $existing = $this->getDbSettings();
@@ -53,7 +54,6 @@ final class SettingsService
         ];
     }
 
-    /** Mutates Laravel config at runtime so that queued jobs use fresh settings. */
     public function applyToConfig(?array $settings = null): void
     {
         $settings ??= $this->getSettings();
@@ -61,7 +61,7 @@ final class SettingsService
 
         foreach (['quality', 'optimize', 'convert', 'queue'] as $key) {
             if (isset($settings[$key]) && ! empty($settings[$key])) {
-                config()->set("moonshine.image_editor.$key", $settings[$key]);
+                config()->set("moonshine.image_editor.{$key}", $settings[$key]);
             }
         }
     }
@@ -100,12 +100,11 @@ final class SettingsService
         return $row->settings;
     }
 
-    /** Form submissions send booleans as strings — normalise them. */
-    private function flattenBooleanStrings(array &$settings): void
+    private function normalizeBooleanStrings(array &$settings): void
     {
         foreach ($settings as $key => &$value) {
             if (is_array($value)) {
-                $this->flattenBooleanStrings($value);
+                $this->normalizeBooleanStrings($value);
             } elseif ($value === 'true' || $value === '1') {
                 $value = true;
             } elseif ($value === 'false' || $value === '0') {
@@ -116,18 +115,15 @@ final class SettingsService
         }
     }
 
-    /**
-     * Validate and sanitize settings before saving or applying to config.
-     * Removes unknown keys and enforces value constraints.
-     */
     private function validateSettings(array $settings): array
     {
         $validated = [];
+        $validFormats = ImageExtension::all();
 
         if (isset($settings['quality']) && is_array($settings['quality'])) {
             $validated['quality'] = [];
             foreach ($settings['quality'] as $format => $value) {
-                if (is_string($format) && in_array($format, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'], true)) {
+                if (is_string($format) && in_array($format, $validFormats, true)) {
                     $validated['quality'][$format] = is_int($value) ? max(1, min(100, $value)) : null;
                 }
             }
@@ -145,7 +141,7 @@ final class SettingsService
 
         if (isset($settings['convert']) && is_array($settings['convert'])) {
             $validated['convert'] = [];
-            foreach (['webp', 'avif'] as $format) {
+            foreach (ImageExtension::conversions() as $format) {
                 if (isset($settings['convert'][$format]) && is_array($settings['convert'][$format])) {
                     $f = $settings['convert'][$format];
                     $validated['convert'][$format] = [
@@ -167,37 +163,5 @@ final class SettingsService
         }
 
         return $validated;
-    }
-
-    /**
-     * Shared method for dispatching image optimization.
-     * Handles both sync and queue modes.
-     */
-    public function dispatchOptimization(string $fullPath, string $relativePath, string $disk, ?array $optimizerConfig = null): void
-    {
-        $optimizerConfig ??= $this->getOptimizerConfig();
-
-        if (config('moonshine.image_editor.queue.enabled', false)) {
-            $connection = config('moonshine.image_editor.queue.connection');
-            $queue = config('moonshine.image_editor.queue.queue', 'images');
-            $delay = config('moonshine.image_editor.queue.delay');
-
-            $job = new ProcessEditedImage($fullPath, $relativePath, $disk, $optimizerConfig);
-
-            if ($connection) {
-                $job->onConnection($connection);
-            }
-
-            $job->onQueue($queue);
-
-            if ($delay !== null) {
-                $job->delay(now()->addSeconds((int) $delay));
-            }
-
-            dispatch($job);
-        } else {
-            $optimizer = new ImageOptimizer($fullPath, $optimizerConfig);
-            $optimizer->process();
-        }
     }
 }

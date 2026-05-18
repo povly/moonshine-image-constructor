@@ -5,26 +5,30 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor\Listeners;
 
 use Illuminate\Support\Facades\Storage;
-use Povly\MoonShineImageEditor\Services\SettingsService;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
+use Povly\MoonShineImageEditor\Support\OptimizationDispatcher;
 use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileUploaded;
 
 final class OptimizeUploadedImage
 {
+    public function __construct(
+        private readonly OptimizationDispatcher $dispatcher,
+    ) {}
+
     public function handle(MediaManagerFileUploaded $event): void
     {
         $extension = strtolower(pathinfo($event->path, PATHINFO_EXTENSION));
 
-        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'], true)) {
+        if (! in_array($extension, ImageExtension::all(), true)) {
             return;
         }
 
-        $storage = Storage::disk($event->disk);
-        $fullPath = $storage->path($event->path);
+        $fullPath = Storage::disk($event->disk)->path($event->path);
 
         if (! file_exists($fullPath)) {
             return;
         }
 
-        app(SettingsService::class)->dispatchOptimization($fullPath, $event->path, $event->disk);
+        $this->dispatcher->dispatch($fullPath, $event->path, $event->disk);
     }
 }

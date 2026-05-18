@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Povly\MoonShineImageEditor\Pages;
 
+use MoonShine\AssetManager\Css;
+use MoonShine\AssetManager\Js;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Support\Enums\FormMethod;
 use MoonShine\UI\Components\FlexibleRender;
@@ -14,16 +16,24 @@ use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Switcher;
-use Povly\MoonShineImageEditor\Services\SettingsService;
+use Povly\MoonShineImageEditor\Contracts\SettingsRepositoryInterface;
 
 final class ImageSettingsPage extends Page
 {
     protected string $title = 'Image Editor Settings';
 
+    protected function assets(): array
+    {
+        return [
+            Js::make('/vendor/image-editor/filerobot-image-editor.min.js')->defer(),
+            Js::make('/vendor/image-editor/image-editor.js')->defer(),
+            Css::make('/vendor/image-editor/image-editor.css'),
+        ];
+    }
+
     protected function components(): iterable
     {
-        $settingsService = app(SettingsService::class);
-        $settings = $settingsService->getSettings();
+        $settings = app(SettingsRepositoryInterface::class)->getSettings();
 
         return [
             Tabs::make([

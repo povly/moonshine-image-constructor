@@ -5,14 +5,7 @@ use Povly\MoonShineImageEditor\Controllers\BatchProcessController;
 use Povly\MoonShineImageEditor\Controllers\ImageEditorController;
 use Povly\MoonShineImageEditor\Controllers\SettingsController;
 
-$middleware = config('moonshine.auth.middleware');
-$middleware = is_array($middleware) ? $middleware : [$middleware];
-
-Route::group([
-    'prefix' => config('moonshine.route.prefix'),
-    'as' => 'moonshine.',
-    'middleware' => [...$middleware, 'web'],
-], function () {
+Route::moonshine(static function (): void {
     Route::post('image-editor/save', [ImageEditorController::class, 'save'])
         ->name('image-editor.save');
 
@@ -33,4 +26,4 @@ Route::group([
 
     Route::post('image-editor/batch/clear-log', [BatchProcessController::class, 'clearLog'])
         ->name('image-editor.batch.clear-log');
-});
+}, withAuthenticate: true);

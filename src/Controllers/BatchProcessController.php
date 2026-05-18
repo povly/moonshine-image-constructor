@@ -7,12 +7,11 @@ namespace Povly\MoonShineImageEditor\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
 use Povly\MoonShineImageEditor\Services\BatchProcessService;
 
 final class BatchProcessController extends Controller
 {
-    private const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
-
     private const MAX_BATCH_FILES = 500;
 
     public function __construct(
@@ -47,7 +46,7 @@ final class BatchProcessController extends Controller
         $files = array_values(array_filter($files, function (string $path): bool {
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-            return in_array($ext, self::ALLOWED_IMAGE_EXTENSIONS, true);
+            return in_array($ext, ImageExtension::all(), true);
         }));
 
         $disk = config('moonshine.media_manager.disk', 'public');

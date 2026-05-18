@@ -6,8 +6,10 @@ namespace Povly\MoonShineImageEditor\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use Povly\MoonShineImageEditor\Services\ImageOptimizer;
-use Povly\MoonShineImageEditor\Services\SettingsService;
+use Povly\MoonShineImageEditor\Contracts\ImageOptimizerInterface;
+use Povly\MoonShineImageEditor\Contracts\SettingsRepositoryInterface;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
+use Povly\MoonShineImageEditor\Support\OptimizationDispatcher;
 
 final class ImageOptimizeCommand extends Command
 {
@@ -18,7 +20,7 @@ final class ImageOptimizeCommand extends Command
 
     protected $description = 'Optimize a single image and generate conversions';
 
-    public function handle(SettingsService $settingsService): int
+    public function handle(SettingsRepositoryInterface $settings, OptimizationDispatcher $dispatcher): int
     {
         $path = $this->argument('path');
         $disk = $this->option('disk');
@@ -33,20 +35,23 @@ final class ImageOptimizeCommand extends Command
 
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'], true)) {
+        if (! in_array($extension, ImageExtension::all(), true)) {
             $this->error("Not an image file: {$path}");
 
             return self::FAILURE;
         }
 
         $fullPath = $storage->path($path);
-        $optimizerConfig = $settingsService->getOptimizerConfig();
+        $optimizerConfig = $settings->getOptimizerConfig();
 
         if ($this->option('queue')) {
-            $settingsService->dispatchOptimization($fullPath, $path, $disk, $optimizerConfig);
+            $dispatcher->dispatch($fullPath, $path, $disk, $optimizerConfig);
             $this->info("Queued optimization for: {$path}");
         } else {
-            $optimizer = new ImageOptimizer($fullPath, $optimizerConfig);
+            $optimizer = app(ImageOptimizerInterface::class, [
+                'fullPath' => $fullPath,
+                'config' => $optimizerConfig,
+            ]);
             $optimizer->process();
             $this->info("Optimized: {$path}");
         }

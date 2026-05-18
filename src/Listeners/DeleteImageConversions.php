@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor\Listeners;
 
 use Illuminate\Support\Facades\Storage;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
 use YuriZoom\MoonShineMediaManager\Events\MediaManagerFileDeleted;
 
 final class DeleteImageConversions
@@ -13,7 +14,7 @@ final class DeleteImageConversions
     {
         $extension = strtolower(pathinfo($event->path, PATHINFO_EXTENSION));
 
-        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'], true)) {
+        if (! in_array($extension, ImageExtension::all(), true)) {
             return;
         }
 
@@ -21,7 +22,7 @@ final class DeleteImageConversions
         $info = pathinfo($event->path);
         $basePath = $info['dirname'].'/'.$info['filename'];
 
-        foreach (['webp', 'avif'] as $format) {
+        foreach (ImageExtension::conversions() as $format) {
             $conversionPath = $basePath.'.'.$format;
 
             if ($storage->exists($conversionPath)) {

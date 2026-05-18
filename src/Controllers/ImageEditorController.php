@@ -7,15 +7,20 @@ namespace Povly\MoonShineImageEditor\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Povly\MoonShineImageEditor\Services\ImageOptimizer;
-use Povly\MoonShineImageEditor\Services\SettingsService;
+use Povly\MoonShineImageEditor\Contracts\ImageOptimizerInterface;
+use Povly\MoonShineImageEditor\Contracts\SettingsRepositoryInterface;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
+use Povly\MoonShineImageEditor\Support\OptimizationDispatcher;
 
 class ImageEditorController extends Controller
 {
     public function __construct(
-        private SettingsService $settingsService,
+        private readonly SettingsRepositoryInterface $settings,
+        private readonly OptimizationDispatcher $dispatcher,
     ) {}
+
     public function save(Request $request): JsonResponse
     {
         $request->validate([
@@ -32,8 +37,6 @@ class ImageEditorController extends Controller
         $disk = config('moonshine.media_manager.disk', 'public');
         $storage = Storage::disk($disk);
 
-        // Prevent path traversal: reject paths containing directory traversal sequences
-        // and verify the source file actually exists on the configured disk
         $normalizedSourcePath = str_replace('\\', '/', $sourcePath);
 
         if (str_contains($normalizedSourcePath, '..') || str_contains(urldecode($normalizedSourcePath), '..') || ! $storage->exists($normalizedSourcePath)) {
@@ -44,21 +47,18 @@ class ImageEditorController extends Controller
         }
 
         $sourceInfo = pathinfo($normalizedSourcePath);
-
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
         $sourceExtension = strtolower($sourceInfo['extension'] ?? '');
 
-        if (! in_array($sourceExtension, $allowedExtensions, true)) {
+        if (! in_array($sourceExtension, ImageExtension::all(), true)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Invalid source file type.',
             ], 403);
         }
+
         $directory = $sourceInfo['dirname'] ?? '.';
         $filename = $sourceInfo['filename'] ?? 'image';
 
-        // Filerobot always exports PNG regardless of user's format choice
-        $originalExtension = strtolower($sourceInfo['extension'] ?? 'png');
         $saveExtension = $targetFormat;
 
         if ($overwrite) {
@@ -79,7 +79,9 @@ class ImageEditorController extends Controller
                 ], 500);
             }
         } catch (\Throwable $e) {
-            ($e);
+            Log::error('[ImageEditor] Failed to save image', [
+                'error' => $e->getMessage(),
+            ]);
 
             return response()->json([
                 'status' => false,
@@ -90,12 +92,15 @@ class ImageEditorController extends Controller
         $fullPath = $storage->path($saved);
         $finalPath = $saved;
 
-        $optimizerConfig = $this->settingsService->getOptimizerConfig();
-        $optimizer = new ImageOptimizer($fullPath, $optimizerConfig);
+        $optimizerConfig = $this->settings->getOptimizerConfig();
+        $optimizer = app(ImageOptimizerInterface::class, [
+            'fullPath' => $fullPath,
+            'config' => $optimizerConfig,
+        ]);
 
         $actualFullPath = $fullPath;
 
-        if ($saveExtension !== $originalExtension && file_exists($fullPath)) {
+        if ($saveExtension !== $sourceExtension && file_exists($fullPath)) {
             $resultPath = $optimizer->convertFormat($saveExtension);
 
             if ($resultPath !== $fullPath) {
@@ -107,7 +112,7 @@ class ImageEditorController extends Controller
             }
         }
 
-        $this->settingsService->dispatchOptimization($actualFullPath, $finalPath, $disk);
+        $this->dispatcher->dispatch($actualFullPath, $finalPath, $disk);
 
         return response()->json([
             'status' => true,

@@ -21,10 +21,10 @@ final class ProcessEditedImage implements ShouldQueue
     public int $timeout = 120;
 
     public function __construct(
-        private string $fullPath,
-        private string $relativePath,
-        private string $disk,
-        private array $optimizerConfig,
+        private readonly string $fullPath,
+        private readonly string $relativePath,
+        private readonly string $disk,
+        private readonly array $optimizerConfig,
     ) {}
 
     public function handle(): void

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Povly\MoonShineImageEditor\Services;
 
 use Intervention\Image\Laravel\Facades\Image;
+use Povly\MoonShineImageEditor\Contracts\ImageOptimizerInterface;
+use Povly\MoonShineImageEditor\Enums\ImageExtension;
 
-final class ImageOptimizer
+final class ImageOptimizer implements ImageOptimizerInterface
 {
     public function __construct(
         private string $fullPath,
@@ -72,7 +74,7 @@ final class ImageOptimizer
     {
         $extension = strtolower(pathinfo($this->fullPath, PATHINFO_EXTENSION));
 
-        if (! in_array($extension, ['jpg', 'jpeg', 'png'])) {
+        if (! in_array($extension, ImageExtension::optimizable(), true)) {
             return;
         }
 
@@ -104,7 +106,7 @@ final class ImageOptimizer
             return;
         }
 
-        $tempPath = dirname($this->fullPath) . '/' . pathinfo($this->fullPath, PATHINFO_FILENAME) . '.' . uniqid('', true) . '.tmp';
+        $tempPath = dirname($this->fullPath).'/'.pathinfo($this->fullPath, PATHINFO_FILENAME).'.'.uniqid('', true).'.tmp';
 
         try {
             $encoded->save($tempPath);
