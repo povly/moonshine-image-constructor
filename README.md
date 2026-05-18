@@ -366,6 +366,13 @@ All controller endpoints are protected by MoonShine auth middleware. Additionall
 | `image-editor-assets` | JS and CSS files to `public/vendor/image-editor/` |
 | `image-editor-config` | Config to `config/moonshine/image_editor.php` |
 | `image-editor-lang` | Translations to `lang/vendor/image-editor/` |
+| `image-editor-migrations` | Migrations to `database/migrations/` |
+
+> **Note:** Migrations run automatically from the package via `loadMigrationsFrom()` when you run `php artisan migrate`. If you need to customize them or prefer having them in your project's `database/migrations/` directory, publish them explicitly:
+>
+> ```bash
+> php artisan vendor:publish --tag=image-editor-migrations
+> ```
 
 ## License
 

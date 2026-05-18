@@ -45,6 +45,10 @@ class ImageEditorServiceProvider extends ServiceProvider
             __DIR__.'/../lang' => lang_path('vendor/image-editor'),
         ], 'image-editor-lang');
 
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'image-editor-migrations');
+
         $this->app->resolving(MediaManagerRegistryInterface::class, function (MediaManagerRegistryInterface $registry): void {
             $registry->addFileAction('image-editor', [
                 'icon' => 'sparkles',
